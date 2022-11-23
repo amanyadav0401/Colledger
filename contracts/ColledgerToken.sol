@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Colledger is ERC20{
 
     constructor() ERC20("Colledger","COL"){
-        
+        _mint(msg.sender,1000000000*10**18);
     }
+
+    
 }
