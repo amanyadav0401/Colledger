@@ -36,6 +36,10 @@ const config: HardhatUserConfig = {
     }
   },
   networks: {
+    mumbai: {
+      url: process.env.ALCHEMY_API_KEY,
+      accounts: [`0x${process.env.MUMBAI_PRIVATE_KEY}`],
+    },
     
   //   ropsten: {
   //     url: "https://ropsten.infura.io/v3/f0a935ee24704d068180510782b60fd0",
@@ -81,10 +85,7 @@ const config: HardhatUserConfig = {
 		// 	url: `https://rinkeby.infura.io/v3/3f05772998774c6a86b0803a6aed75c3`,
 		// 	accounts: [`0x${MUMBAI_PRIVATE_KEY}`]
 		// },
-    // mumbai: {
-    //   url: ALCHEMY_API_KEY,
-    //   accounts: [`0x${MUMBAI_PRIVATE_KEY}`],
-    // },
+    
    
 
   etherscan: {

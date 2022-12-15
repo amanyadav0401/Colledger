@@ -25,11 +25,12 @@ struct SubjectDetails {
 
 struct BranchDetails {
     bytes branchName;
-    uint totalStudents;
-    uint totalSubjects;
+    uint studentId;
+    uint subjectId;
     bytes HOD;
     mapping(uint=>SubjectDetails) subjectInfo;
     mapping(uint=>StudentDetails) studentInfo;
+    mapping(uint=>mapping(uint=>uint)) studentMarks;
 }
 
 struct CollegeBranchInfo {
@@ -52,7 +53,7 @@ function studentDetail(uint _collegeId, uint _year, uint _branchId, uint _rollNu
 
 function branchDetail(uint _collegeId, uint _year, uint _branchId) external view returns(uint totalStudents, uint totalSubjects, bytes memory HOD){
     CollegeBranchInfo storage collegeBranchInfo = collegeYearBranching[_collegeId][_year];
-    return (collegeBranchInfo.branchMap[_branchId].totalStudents,collegeBranchInfo.branchMap[_branchId].totalSubjects,collegeBranchInfo.branchMap[_branchId].HOD);
+    return (collegeBranchInfo.branchMap[_branchId].studentId,collegeBranchInfo.branchMap[_branchId].subjectId,collegeBranchInfo.branchMap[_branchId].HOD);
 }
 
  function registerNewStudent(uint _collegeId, uint _branchId, uint _year, uint _noOfStudents, StudentDetails[] memory _studentDetails) public nonReentrant {
@@ -61,8 +62,8 @@ function branchDetail(uint _collegeId, uint _year, uint _branchId) external view
          BranchDetails storage branchInfo = collegeInfo.branchMap[_branchId];
          
          for(uint i=1; i<=_noOfStudents; i++){
-         branchInfo.totalStudents++;
-         branchInfo.studentInfo[branchInfo.totalStudents]= _studentDetails[i];
+         branchInfo.studentId++;
+         branchInfo.studentInfo[branchInfo.studentId]= _studentDetails[i];
          }
     
  } 
