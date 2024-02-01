@@ -4,9 +4,12 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
+import "contracts/libraries/Login.sol";
 
 
-contract ImplementationInstitute is ERC721URIStorageUpgradeable {
+
+contract ImplementationInstitute is ERC721URIStorageUpgradeable, EIP712Upgradeable {
 
     uint degreeId;
 
@@ -44,21 +47,54 @@ contract ImplementationInstitute is ERC721URIStorageUpgradeable {
 
     bool public mintingEnabled;
 
+    error transferRestricted();
+
+    error notAdmin(address _sender, address _admin);
+
+    error zeroAddress();
+
+    error courseIncomplete(uint currentSem, uint totalSem);
+
+    error notPassed();
+
+    error mintDisabled();
+
     modifier onlyAdmin() {
-        require(msg.sender==admin,"You are not the admin!");
+        if(msg.sender!=admin){
+            revert notAdmin(msg.sender,admin);
+        }
         _;
     }
 
     function init(string memory _entityName, address _portalAdmin, string memory _collegeCode) external initializer{
-        require(_portalAdmin!=address(0),"Zero address.");
+        if(_portalAdmin==address(0)){
+            revert zeroAddress();
+        }
         __ERC721_init_unchained(_entityName, _entityName);
+        __EIP712_init_unchained("Colledger_Protocol", "1");
         admin = _portalAdmin;
         collegeCode = _collegeCode;
     }
 
+    function hashUser(Login.InsLogin memory login) internal view returns(bytes32) {
+        return _hashTypedDataV4(keccak256(abi.encode(keccak256(
+            "InsLogin(address admin,string insReg)"
+        ),
+        login.admin,
+        keccak256(bytes(login.insReg))
+        )
+        )
+        );
+    }
+
+    function verifySigner(Login.InsLogin memory login) public view returns (address, bool) {
+        bytes32 digest = hashUser(login);
+        address user = ECDSAUpgradeable.recover(digest,login.signature);
+        return (user,admin==user);
+    }
+
     function _transfer(address from, address to, uint256 tokenId) internal virtual override{
-        bool letTransfer = false;
-        require(letTransfer,"You are not allowed to transfer a credential.");
+        revert transferRestricted();     
     }
 
     function enrollStudent(address _identity, uint _programme) external onlyAdmin {
@@ -90,9 +126,15 @@ contract ImplementationInstitute is ERC721URIStorageUpgradeable {
     }
 
     function mintFinalCredential(address _identity,uint _programmeCode) external {
-        require(currentSemester[_identity]==programmeSemestersRequired[currentProgrammeCode[_identity]],"You have not completed all semesters!");
-        require(MarksheetCredential[_identity][_programmeCode][programmeSemestersRequired[currentProgrammeCode[_identity]]].isPassed,"Not passed yet!");
-        require(mintingEnabled,"Minting is disabled!");
+        if(currentSemester[_identity] <= programmeSemestersRequired[currentProgrammeCode[_identity]]) {
+            revert courseIncomplete(currentSemester[_identity], programmeSemestersRequired[currentProgrammeCode[_identity]]);
+        }
+        if(!MarksheetCredential[_identity][_programmeCode][programmeSemestersRequired[currentProgrammeCode[_identity]]].isPassed) {
+            revert notPassed();
+        }
+        if(!mintingEnabled) {
+            revert mintDisabled();
+        }
         degreeId++;
         _safeMint(_identity, degreeId);
         CredentialDetails[degreeId].programmeCode = currentProgrammeCode[_identity];
@@ -100,13 +142,8 @@ contract ImplementationInstitute is ERC721URIStorageUpgradeable {
         CredentialDetails[degreeId].issueTime = block.timestamp;
     }
 
-
-
-
-
-
-
-
-
+    function returnInterface() public pure returns(string memory) {
+    return "Institute";
+    }
 
 }

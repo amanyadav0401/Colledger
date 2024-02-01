@@ -11,6 +11,8 @@ contract ImplementationEmployer is ERC721URIStorageUpgradeable{
 
     uint256 public totalCredentials;
 
+    string orgReg;
+
     struct Credential {
         uint256 employeeNumber;
         address identity;
@@ -32,10 +34,11 @@ contract ImplementationEmployer is ERC721URIStorageUpgradeable{
         _;
     }
 
-    function init(string memory _entityName, address _portalAdmin) external initializer{
+    function init(string memory _entityName, address _portalAdmin, string memory _orgReg) external initializer{
         require(_portalAdmin!=address(0),"Zero address.");
         __ERC721_init_unchained(_entityName, _entityName);
         admin = _portalAdmin;
+        orgReg = _orgReg;
     }
 
     function _transfer(address from, address to, uint256 tokenId) internal virtual override{
@@ -84,6 +87,10 @@ contract ImplementationEmployer is ERC721URIStorageUpgradeable{
 
     function checkCurrentCredential(address _identity) external view returns(Credential memory) {
         return EmployeeCredential[employeeCurrentCredential[_identity]];
+    }
+
+    function returnInterface() public pure returns(string memory) {
+    return "Employer";
     }
 
 }

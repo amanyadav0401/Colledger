@@ -29,4 +29,8 @@ function verifyIdentity() external view returns(bool) {
     return colledgerFactory.verifyIdentity(address(this));
 }
 
+function returnInterface() public pure returns(string memory) {
+    return "Signer";
 }
+
+} 

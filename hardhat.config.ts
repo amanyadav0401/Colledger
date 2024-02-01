@@ -36,10 +36,10 @@ const config: HardhatUserConfig = {
     }
   },
   networks: {
-    mumbai: {
-      url: process.env.ALCHEMY_API_KEY,
-      accounts: [`0x${process.env.MUMBAI_PRIVATE_KEY}`],
-    },
+    // mumbai: {
+    //   url: process.env.ALCHEMY_API_KEY,
+    //   accounts: [`0x${process.env.MUMBAI_PRIVATE_KEY}`],
+    // },
     
   //   ropsten: {
   //     url: "https://ropsten.infura.io/v3/f0a935ee24704d068180510782b60fd0",
